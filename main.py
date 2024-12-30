@@ -500,17 +500,22 @@ class MainWindow(QMainWindow):
         self.result_display.append(f"Mixed audio saved to {save_path}")
         self.blended_song = save_path
     def play_and_pause(self):
-        if self.isPlaying :
-            sd.stop()
-            self.play_and_pause_button.setText("Play Blended Song")
-            self.isPlaying=False
+        if self.blended_song:
 
+            if self.isPlaying :
+                sd.stop()
+                self.play_and_pause_button.setText("Play Blended Song")
+                self.isPlaying=False
+
+            else:
+                audio_path = self.blended_song
+                y, sr = librosa.load(audio_path, sr=None)
+                sd.play(y, sr)
+                self.play_and_pause_button.setText("Pause Blended Song")
+                self.isPlaying=True
         else:
-            audio_path = self.blended_song
-            y, sr = librosa.load(audio_path, sr=None)
-            sd.play(y, sr)
-            self.play_and_pause_button.setText("Pause Blended Song")
-            self.isPlaying=True
+             self.result_display.append("No bleded song.")
+
 
 
 
