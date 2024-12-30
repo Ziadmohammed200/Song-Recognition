@@ -2,11 +2,11 @@ import sounddevice as sd
 import sys
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QPushButton, QFileDialog, QVBoxLayout,
-    QWidget, QLabel, QTextEdit, QProgressBar, QSlider, QHBoxLayout, QGroupBox
+    QWidget, QLabel, QTextEdit, QProgressBar, QSlider, QGroupBox
 )
 from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QPixmap, QIcon
-from scipy.spatial.distance import euclidean, hamming
+from PyQt5.QtGui import QIcon
+from scipy.spatial.distance import euclidean
 import os
 import json
 import hashlib
@@ -77,7 +77,7 @@ class SongFingerprint:
             normalized_distance = np.clip(normalized_distance, 0, 1)  # Ensure it's between 0 and 1
 
             similarity = (1 - normalized_distance) * 100
-
+            print(type(similarity))
             logging.debug(
                 f"Distance: {distance}, Normalized Distance: {normalized_distance}, Similarity: {similarity}%")
             return similarity
@@ -124,19 +124,32 @@ class SongFingerprint:
             logging.error(f"Error generating fingerprint for {file_path}: {e}")
             return None, None
 
-    def generate_hash(self, features: np.ndarray) -> str:
+    def generate_hash(self, file_path: str) -> str:
         try:
-            logging.debug("Generating hash for features.")
-            normalized = (features - np.min(features)) / (np.max(features) - np.min(features) + 1e-7)
+            logging.debug("Loading audio file and extracting features.")
+            # Load audio file
+            y, sr = librosa.load(file_path, sr=self.sample_rate, duration=self.duration)
 
+            # Extract perceptual features (MFCCs)
+            mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=20)
+            logging.debug(f"MFCC shape: {mfcc.shape}")
+
+            # Take mean of MFCCs across time
+            mfcc_mean = np.mean(mfcc, axis=1)
+
+            # Normalize the features
+            normalized = (mfcc_mean - np.min(mfcc_mean)) / (np.max(mfcc_mean) - np.min(mfcc_mean) + 1e-7)
+
+            # Threshold to generate binary string
             mean_val = np.mean(normalized)
             binary = ['1' if x > mean_val else '0' for x in normalized]
 
+            # Generate hash from binary string
             hash_str = ''.join(binary)
             return hashlib.md5(hash_str.encode()).hexdigest()
 
         except Exception as e:
-            logging.error(f"Error generating hash: {e}")
+            logging.error(f"Error generating perceptual hash: {e}")
             return "0" * 32
 
     def match_song(self, file_path: str, threshold: float = 0.0):
@@ -159,7 +172,8 @@ class SongFingerprint:
                     logging.error(f"Error processing entry {label}: {e}")
                     continue
 
-            return dict(sorted(results.items(), key=lambda item: item[1], reverse=True))  # Return top 5 matches
+            return dict(list(sorted(results.items(), key=lambda item: item[1], reverse=True))[:5])
+
 
         except Exception as e:
             logging.error(f"Error matching song: {e}")
