@@ -422,7 +422,9 @@ class MainWindow(QMainWindow):
         self.result_display.append(f"Added {len(audio_files)} songs to the database from folder '{folder}'.\n")
 
     def match_song(self, index, blended_song=None):
+
         if index == 0:  # Uploaded song
+            self.result_display.clear()
             file, _ = QFileDialog.getOpenFileName(self, "Select an Audio File", "", "Audio Files (*.mp3 *.wav)")
             if not file:
                 return
@@ -449,9 +451,12 @@ class MainWindow(QMainWindow):
     def clear_database(self):
         self.fingerprint_engine.database = {}
         self.fingerprint_engine.save_database()
+        self.result_display.clear()
         self.result_display.append("Database cleared.\n")
 
+
     def load_audio1(self):
+        self.result_display.clear()
         file_path, _ = QFileDialog.getOpenFileName(self, "Select Audio File 1", "", "Audio Files (*.mp3 *.wav)")
         if file_path:
             self.audio1_path = file_path
