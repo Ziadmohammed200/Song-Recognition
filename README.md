@@ -40,19 +40,7 @@ The **Signal Fingerprinting Application** identifies sound files based on intrin
 ![Song Repository](https://github.com/Ziadmohammed200/Song-Recognition/blob/4a08971465a80b44715aabcb8b9472700d64fa20/images/Audio%20Recognition%20and%20Mixing%20App%20train.png)
 ---
 
-## 🔠 Project Structure
 
-### **🚰 Directories**
-
-- **`images/`**: Screenshots and illustrations.
-
-### **🔂 Files**
-- **`README.md`**: Project overview and setup instructions.
-- **`requirements.txt`**: List of dependencies.
-- **`main.py`**: Implementation of the Signal Fingerprinting Application.
-- **`fingerprint_database.json`**: Database of song features.
-
----
 
 ## 🔧 Installation
 
